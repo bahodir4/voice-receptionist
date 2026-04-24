@@ -1,0 +1,66 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "or": "or",
+    "back": "Back",
+    "submit": "Submit",
+    "cancel": "Cancel"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your account",
+      "email": "Email address",
+      "password": "Password",
+      "remember": "Remember me",
+      "forgot": "Forgot password?",
+      "submit": "Sign in",
+      "no_account": "Don't have an account?",
+      "register_link": "Create one"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Start your free trial today",
+      "username": "Username",
+      "email": "Email address",
+      "password": "Password",
+      "submit": "Create account",
+      "have_account": "Already have an account?",
+      "login_link": "Sign in",
+      "password_hint": "Min 8 chars, one uppercase, one digit"
+    },
+    "verify": {
+      "title": "Verify your email",
+      "subtitle": "We sent a verification link to your email",
+      "checking": "Verifying...",
+      "success": "Email verified! Redirecting to login...",
+      "invalid": "Invalid or expired verification link",
+      "resend": "Resend verification email"
+    },
+    "forgot": {
+      "title": "Forgot password?",
+      "subtitle": "Enter your email and we'll send a reset link",
+      "email": "Email address",
+      "submit": "Send reset link",
+      "sent": "Check your inbox for the reset link",
+      "back_login": "Back to sign in"
+    },
+    "reset": {
+      "title": "Set new password",
+      "subtitle": "Choose a strong password for your account",
+      "password": "New password",
+      "submit": "Reset password",
+      "success": "Password updated! Redirecting to login...",
+      "invalid": "Invalid or expired reset link"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "voice": "Voice Chat",
+    "chat": "Text Chat",
+    "admin": "Admin",
+    "logout": "Sign out"
+  }
+}

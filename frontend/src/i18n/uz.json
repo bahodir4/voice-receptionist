@@ -1,0 +1,66 @@
+{
+  "common": {
+    "loading": "Yuklanmoqda...",
+    "error": "Xatolik yuz berdi",
+    "retry": "Qayta urinib ko'ring",
+    "or": "yoki",
+    "back": "Orqaga",
+    "submit": "Yuborish",
+    "cancel": "Bekor qilish"
+  },
+  "auth": {
+    "login": {
+      "title": "Xush kelibsiz",
+      "subtitle": "Hisobingizga kiring",
+      "email": "Email manzil",
+      "password": "Parol",
+      "remember": "Eslab qolish",
+      "forgot": "Parolni unutdingizmi?",
+      "submit": "Kirish",
+      "no_account": "Hisobingiz yo'qmi?",
+      "register_link": "Ro'yxatdan o'ting"
+    },
+    "register": {
+      "title": "Hisob yaratish",
+      "subtitle": "Bepul sinov boshlang",
+      "username": "Foydalanuvchi nomi",
+      "email": "Email manzil",
+      "password": "Parol",
+      "submit": "Hisob yaratish",
+      "have_account": "Hisobingiz bormi?",
+      "login_link": "Kirish",
+      "password_hint": "Min 8 belgi, bitta katta harf, bitta raqam"
+    },
+    "verify": {
+      "title": "Emailingizni tasdiqlang",
+      "subtitle": "Tasdiqlash havolasi emailingizga yuborildi",
+      "checking": "Tekshirilmoqda...",
+      "success": "Email tasdiqlandi! Login sahifasiga yo'naltirilmoqda...",
+      "invalid": "Noto'g'ri yoki muddati o'tgan havola",
+      "resend": "Tasdiqlash emailini qayta yuborish"
+    },
+    "forgot": {
+      "title": "Parolni unutdingizmi?",
+      "subtitle": "Emailingizni kiriting, tiklash havolasini yuboramiz",
+      "email": "Email manzil",
+      "submit": "Tiklash havolasini yuborish",
+      "sent": "Tiklash havolasi uchun pochtangizni tekshiring",
+      "back_login": "Kirish sahifasiga qaytish"
+    },
+    "reset": {
+      "title": "Yangi parol o'rnating",
+      "subtitle": "Hisobingiz uchun kuchli parol tanlang",
+      "password": "Yangi parol",
+      "submit": "Parolni tiklash",
+      "success": "Parol yangilandi! Kirish sahifasiga yo'naltirilmoqda...",
+      "invalid": "Noto'g'ri yoki muddati o'tgan tiklash havolasi"
+    }
+  },
+  "nav": {
+    "dashboard": "Boshqaruv paneli",
+    "voice": "Ovozli Chat",
+    "chat": "Matnli Chat",
+    "admin": "Admin",
+    "logout": "Chiqish"
+  }
+}
