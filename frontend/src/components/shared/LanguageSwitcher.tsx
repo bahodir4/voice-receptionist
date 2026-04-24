@@ -20,9 +20,9 @@ export function LanguageSwitcher({ className }: { className?: string }) {
           onClick={() => i18n.changeLanguage(lang.code)}
           className={clsx(
             'px-2 py-0.5 text-xs font-medium rounded transition-all',
-            i18n.language === lang.code
-              ? 'bg-brand-600 text-white'
-              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700',
+            (i18n.resolvedLanguage ?? i18n.language) === lang.code
+              ? 'bg-violet-600 text-white'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.07]',
           )}
         >
           {lang.label}

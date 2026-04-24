@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import logging
 from functools import lru_cache
 
 from fastapi_mail import FastMail, MessageSchema, MessageType, ConnectionConfig
+from loguru import logger
 
 from app.core.config import get_settings
-
-logger = logging.getLogger(__name__)
 
 
 @lru_cache()
@@ -36,7 +34,7 @@ class EmailService:
 
     async def _send(self, to: str, subject: str, html: str) -> None:
         if not self._settings.MAIL_USERNAME:
-            logger.warning("MAIL_USERNAME not set — skipping email to %s", to)
+            logger.warning("MAIL_USERNAME not set — skipping email to {}", to)
             return
 
         msg = MessageSchema(
@@ -48,9 +46,9 @@ class EmailService:
         fm = FastMail(_get_mail_config())
         try:
             await fm.send_message(msg)
-            logger.info("Email sent to=%s subject=%s", to, subject)
+            logger.info("Email sent to={} subject={}", to, subject)
         except Exception as exc:
-            logger.error("Email failed to=%s: %s", to, exc)
+            logger.error("Email failed to={}: {}", to, exc)
             raise
 
     # ── Templates ──────────────────────────────────────────────────────────

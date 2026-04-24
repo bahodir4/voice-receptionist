@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-import logging
 from datetime import datetime, timedelta, timezone
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
+from loguru import logger
+
 from app.core.config import get_settings
 from app.core.security import SecurityService
 from app.services.email_service import EmailService
-
-logger = logging.getLogger(__name__)
 
 _TOKEN_EXPIRE_VERIFY = timedelta(hours=24)
 _TOKEN_EXPIRE_RESET = timedelta(hours=1)
@@ -51,7 +50,7 @@ class AuthService:
         try:
             await self._email.send_verification_email(email, username, token)
         except Exception:
-            logger.warning("Verification email failed for %s — continuing", email)
+            logger.warning("Verification email failed for {} — continuing", email)
 
         return {"id": user_id, "email": email, "username": username, "is_verified": False, "created_at": now}
 
@@ -81,11 +80,17 @@ class AuthService:
 
     async def login(self, email: str, password: str, remember_me: bool = False) -> dict:
         user = await self._db.users.find_one({"email": email})
-        if not user or not SecurityService.verify_password(password, user["password_hash"]):
+        if not user:
+            logger.debug("Login failed — no user found for email={}", email)
+            raise ValueError("Invalid email or password")
+        if not SecurityService.verify_password(password, user["password_hash"]):
+            logger.debug("Login failed — wrong password for email={}", email)
             raise ValueError("Invalid email or password")
         if not user.get("is_active", True):
+            logger.debug("Login failed — account disabled email={}", email)
             raise ValueError("Account disabled")
         if not user.get("is_verified", False):
+            logger.debug("Login failed — email not verified email={}", email)
             raise ValueError("Please verify your email before logging in")
 
         user_id = str(user["_id"])
@@ -121,7 +126,7 @@ class AuthService:
         try:
             await self._email.send_password_reset_email(email, user["username"], token)
         except Exception:
-            logger.warning("Reset email failed for %s", email)
+            logger.warning("Reset email failed for {}", email)
 
     # ── Reset password ─────────────────────────────────────────────────────
 

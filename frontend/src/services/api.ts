@@ -68,6 +68,22 @@ class ApiClient {
   async healthCheck() {
     return this.http.get<{ status: string }>('/health')
   }
+
+  // ── Voice ─────────────────────────────────────────────────────────────────
+
+  async getVoiceToken(roomName?: string) {
+    return this.http.post<{ token: string; room_name: string; livekit_url: string }>(
+      '/api/voice/token',
+      { room_name: roomName ?? null },
+    )
+  }
+
+  async endVoiceSession(roomName: string) {
+    return this.http.post<{ session_id: string; duration_seconds: number }>(
+      '/api/voice/session/end',
+      { room_name: roomName },
+    )
+  }
 }
 
 export interface User {

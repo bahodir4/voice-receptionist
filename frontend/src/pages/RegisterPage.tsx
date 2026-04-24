@@ -3,38 +3,32 @@ import { Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { User, Mail, Lock, Eye, EyeOff, CheckCircle2 } from 'lucide-react'
+import { User, Mail, Lock, Eye, EyeOff, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import toast from 'react-hot-toast'
+import { motion } from 'framer-motion'
 
 import { AuthLayout } from '@/components/shared/AuthLayout'
-import { Card } from '@/components/shared/Card'
 import { Input } from '@/components/shared/Input'
 import { Button } from '@/components/shared/Button'
 import { useAuth } from '@/hooks/useAuth'
 import { extractError } from '@/services/api'
 
 const schema = z.object({
-  username: z
-    .string()
-    .min(3, 'Min 3 characters')
-    .max(50, 'Max 50 characters')
-    .regex(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers and underscores'),
+  username: z.string().min(3, 'Min 3 characters').max(50).regex(/^[a-zA-Z0-9_]+$/, 'Letters, numbers, underscores only'),
   email: z.string().email('Enter a valid email'),
-  password: z
-    .string()
-    .min(8, 'Min 8 characters')
-    .regex(/[A-Z]/, 'Must contain one uppercase letter')
-    .regex(/[0-9]/, 'Must contain one digit'),
+  password: z.string().min(8, 'Min 8 characters').regex(/[A-Z]/, 'One uppercase letter').regex(/[0-9]/, 'One digit'),
 })
-
 type FormData = z.infer<typeof schema>
 
-const STRENGTH_RULES = [
-  { label: '8+ characters', test: (v: string) => v.length >= 8 },
-  { label: 'Uppercase letter', test: (v: string) => /[A-Z]/.test(v) },
-  { label: 'Number', test: (v: string) => /[0-9]/.test(v) },
+const RULES = [
+  { label: '8+ characters',     test: (v: string) => v.length >= 8 },
+  { label: 'Uppercase',         test: (v: string) => /[A-Z]/.test(v) },
+  { label: 'Number',            test: (v: string) => /[0-9]/.test(v) },
 ]
+
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
+const item = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } }
 
 export function RegisterPage() {
   const { t } = useTranslation()
@@ -45,7 +39,6 @@ export function RegisterPage() {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
-
   const password = watch('password', '')
 
   const onSubmit = async (data: FormData) => {
@@ -61,76 +54,77 @@ export function RegisterPage() {
 
   return (
     <AuthLayout>
-      <Card title={t('auth.register.title')} subtitle={t('auth.register.subtitle')}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <Input
-            label={t('auth.register.username')}
-            type="text"
-            autoComplete="username"
-            placeholder="johndoe"
-            leftIcon={<User className="w-4 h-4" />}
-            error={errors.username?.message}
-            {...register('username')}
-          />
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
 
-          <Input
-            label={t('auth.register.email')}
-            type="email"
-            autoComplete="email"
-            placeholder="you@example.com"
-            leftIcon={<Mail className="w-4 h-4" />}
-            error={errors.email?.message}
-            {...register('email')}
-          />
+        <motion.div variants={item} className="space-y-1.5">
+          <h2 className="text-2xl font-bold text-white tracking-tight">Create account</h2>
+          <p className="text-slate-500 text-sm">Join thousands using AI for their reception</p>
+        </motion.div>
 
-          <div className="space-y-1.5">
-            <Input
-              label={t('auth.register.password')}
-              type={showPass ? 'text' : 'password'}
-              autoComplete="new-password"
-              placeholder="••••••••"
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <motion.div variants={item}>
+            <Input label={t('auth.register.username')} type="text" autoComplete="username"
+              placeholder="johndoe" leftIcon={<User className="w-4 h-4" />}
+              error={errors.username?.message} {...register('username')} />
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Input label={t('auth.register.email')} type="email" autoComplete="email"
+              placeholder="you@example.com" leftIcon={<Mail className="w-4 h-4" />}
+              error={errors.email?.message} {...register('email')} />
+          </motion.div>
+
+          <motion.div variants={item} className="space-y-2">
+            <Input label={t('auth.register.password')} type={showPass ? 'text' : 'password'}
+              autoComplete="new-password" placeholder="••••••••"
               leftIcon={<Lock className="w-4 h-4" />}
               error={errors.password?.message}
               rightElement={
-                <button
-                  type="button"
-                  onClick={() => setShowPass((v) => !v)}
-                  className="text-slate-400 hover:text-slate-200 transition-colors"
-                >
+                <button type="button" onClick={() => setShowPass(v => !v)}
+                  className="text-slate-500 hover:text-slate-300 transition-colors">
                   {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               }
               {...register('password')}
             />
-            {password.length > 0 && (
-              <div className="flex gap-3 pt-1">
-                {STRENGTH_RULES.map((rule) => (
-                  <span
-                    key={rule.label}
-                    className={`flex items-center gap-1 text-xs transition-colors ${
-                      rule.test(password) ? 'text-emerald-400' : 'text-slate-600'
-                    }`}
-                  >
-                    <CheckCircle2 className="w-3 h-3" />
-                    {rule.label}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
 
-          <Button type="submit" fullWidth loading={loading} size="lg">
-            {t('auth.register.submit')}
-          </Button>
+            {/* Password strength */}
+            {password.length > 0 && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
+                className="flex gap-2 pt-1">
+                {RULES.map(rule => {
+                  const ok = rule.test(password)
+                  return (
+                    <span key={rule.label}
+                      className={`flex items-center gap-1 text-xs transition-all duration-200 ${ok ? 'text-emerald-400' : 'text-slate-600'}`}>
+                      <span className={`w-3.5 h-3.5 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-200
+                        ${ok ? 'bg-emerald-500/20' : 'bg-white/[0.04]'}`}>
+                        {ok && <Check className="w-2 h-2" />}
+                      </span>
+                      {rule.label}
+                    </span>
+                  )
+                })}
+              </motion.div>
+            )}
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Button type="submit" fullWidth loading={loading} size="lg">
+              {t('auth.register.submit')}
+            </Button>
+          </motion.div>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-500">
-          {t('auth.register.have_account')}{' '}
-          <Link to="/login" className="text-brand-400 hover:text-brand-300 font-medium transition-colors">
-            {t('auth.register.login_link')}
-          </Link>
-        </p>
-      </Card>
+        <motion.div variants={item} className="text-center">
+          <p className="text-sm text-slate-600">
+            {t('auth.register.have_account')}{' '}
+            <Link to="/login" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
+              {t('auth.register.login_link')}
+            </Link>
+          </p>
+        </motion.div>
+      </motion.div>
     </AuthLayout>
   )
 }
