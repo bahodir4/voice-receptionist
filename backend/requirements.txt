@@ -14,13 +14,9 @@ python-dotenv==1.0.1
 loguru==0.7.3
 httpx==0.28.1
 dnspython==2.7.0
-
-# ── Phase 2: Voice pipeline ────────────────────────────────────────────────────
 livekit-agents[openai,elevenlabs,silero]~=1.5
 livekit-api~=1.1
 openai>=1.57.0
 elevenlabs>=2.44.0
-
-# ── Phase 2 extras: multilingual turn detection + noise cancellation ──────────
-livekit-plugins-turn-detector
-livekit-plugins-ai-coustics
+livekit-plugins-turn-detector>=1.5.6
+livekit-plugins-ai-coustics>=0.2.10
