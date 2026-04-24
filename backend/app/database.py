@@ -68,6 +68,14 @@ class Database:
         await db.phone_calls.create_index("status")
         await db.phone_calls.create_index("direction")
 
+        # voice_sessions
+        await db.voice_sessions.create_index("user_id")
+        await db.voice_sessions.create_index([("started_at", -1)])
+        await db.voice_sessions.create_index("status")
+
+        # business_settings (single doc — no compound index needed)
+        await db.business_settings.create_index("_id")
+
         logger.info("MongoDB indexes ensured")
 
     # ── Accessor ───────────────────────────────────────────────────────────

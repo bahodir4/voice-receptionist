@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from loguru import logger
+from motor.motor_asyncio import AsyncIOMotorClient
+
 from app.core.config import get_settings
 
-RECEPTIONIST_PROMPT = """You are a professional AI voice receptionist for a business.
+_BASE_PROMPT = """You are a professional AI voice receptionist for a business.
 
 Your personality:
 - Warm, polite, and highly professional at all times
@@ -25,8 +28,58 @@ Important rules:
 """
 
 
+def build_system_prompt(settings: dict | None = None) -> str:
+    """Combine the base prompt with live business settings from the database."""
+    prompt = _BASE_PROMPT
+
+    if not settings:
+        return prompt
+
+    info_lines: list[str] = []
+    if settings.get("business_name"):
+        info_lines.append(f"Business name: {settings['business_name']}")
+    if settings.get("business_hours"):
+        info_lines.append(f"Business hours: {settings['business_hours']}")
+    if settings.get("business_address"):
+        info_lines.append(f"Address: {settings['business_address']}")
+    if settings.get("business_phone"):
+        info_lines.append(f"Phone: {settings['business_phone']}")
+    if settings.get("business_email"):
+        info_lines.append(f"Email: {settings['business_email']}")
+    if settings.get("business_description"):
+        info_lines.append(f"About: {settings['business_description']}")
+
+    if info_lines:
+        prompt += "\n\nBusiness information:\n" + "\n".join(f"- {l}" for l in info_lines)
+
+    faqs = settings.get("faqs", [])
+    if faqs:
+        faq_block = "\n".join(f"Q: {f['question']}\nA: {f['answer']}" for f in faqs)
+        prompt += f"\n\nFrequently Asked Questions:\n{faq_block}"
+
+    if settings.get("custom_instructions"):
+        prompt += f"\n\nAdditional instructions:\n{settings['custom_instructions']}"
+
+    return prompt
+
+
+async def load_business_settings() -> dict | None:
+    """Connect to MongoDB and return the business settings document."""
+    s = get_settings()
+    try:
+        client = AsyncIOMotorClient(s.MONGODB_URI, serverSelectionTimeoutMS=3_000)
+        db = client[s.MONGODB_DB_NAME]
+        doc = await db.business_settings.find_one({"_id": "default"})
+        client.close()
+        return doc
+    except Exception as exc:
+        logger.warning("Could not load business settings: {}", exc)
+        return None
+
+
 def get_system_prompt() -> str:
-    return RECEPTIONIST_PROMPT
+    """Sync fallback — returns base prompt without DB settings."""
+    return _BASE_PROMPT
 
 
 def get_agent_config() -> dict:

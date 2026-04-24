@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     APP_NAME: str = "Voice Receptionist"
     FRONTEND_URL: str = "http://localhost:5173"
     BACKEND_URL: str = "http://localhost:8000"
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
     DEBUG: bool = True
 
     # ── LiveKit (Phase 2) ─────────────────────────────────────────────────

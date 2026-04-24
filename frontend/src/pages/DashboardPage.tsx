@@ -1,13 +1,18 @@
+import { useEffect } from 'react'
 import { Mic, MessageSquare, Phone, BarChart3, LogOut, User, Activity, Clock, Layers } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
+import { useAdmin } from '@/hooks/useAdmin'
 import { LanguageSwitcher } from '@/components/shared/LanguageSwitcher'
 
 export function DashboardPage() {
   const { t } = useTranslation()
   const { user, logout } = useAuth()
+  const { overview, loadOverview } = useAdmin()
+
+  useEffect(() => { loadOverview() }, [loadOverview])
 
   const CARDS = [
     {
@@ -54,16 +59,37 @@ export function DashboardPage() {
       gradient:    'from-orange-600 to-rose-600',
       borderHover: 'hover:border-orange-500/30',
       glowHover:   'hover:shadow-[0_8px_32px_rgba(234,88,12,0.15)]',
-      badge:    'Phase 5',
-      badgeCls: 'bg-white/[0.04] text-slate-500 border-white/[0.06]',
-      dot:      'bg-slate-600',
+      badge:    'Live',
+      badgeCls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      dot:      'bg-emerald-400',
     },
   ]
 
+  function fmtDuration(s: number) {
+    if (s === 0) return '—'
+    const m = Math.floor(s / 60)
+    return m > 0 ? `${m}m` : `${s}s`
+  }
+
   const STATS = [
-    { icon: Activity, label: t('dashboard.sessions_today'), value: '—', sub: t('dashboard.no_data') },
-    { icon: Clock,    label: t('dashboard.avg_duration'),   value: '—', sub: t('dashboard.no_data') },
-    { icon: Layers,   label: t('dashboard.total_sessions'), value: '0', sub: t('dashboard.all_time') },
+    {
+      icon: Activity,
+      label: t('dashboard.sessions_today'),
+      value: overview ? String(overview.today.total) : '—',
+      sub: overview ? t('dashboard.no_data') : t('dashboard.no_data'),
+    },
+    {
+      icon: Clock,
+      label: t('dashboard.avg_duration'),
+      value: overview ? fmtDuration(overview.avg_call_duration) : '—',
+      sub: t('dashboard.no_data'),
+    },
+    {
+      icon: Layers,
+      label: t('dashboard.total_sessions'),
+      value: overview ? String(overview.all_time.total) : '0',
+      sub: t('dashboard.all_time'),
+    },
   ]
 
   const SERVICES = [
