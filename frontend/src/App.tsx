@@ -6,6 +6,7 @@ import { VerifyEmailPage }    from '@/pages/VerifyEmailPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
 import { ResetPasswordPage }  from '@/pages/ResetPasswordPage'
 import { DashboardPage }      from '@/pages/DashboardPage'
+import { VoiceChatPage }      from '@/pages/VoiceChatPage'
 import { ProtectedRoute }     from '@/components/shared/ProtectedRoute'
 
 export default function App() {
@@ -21,7 +22,7 @@ export default function App() {
       {/* Protected */}
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<DashboardPage />} />
-        {/* Phase 2+ routes will nest here */}
+        <Route path="/voice"     element={<VoiceChatPage />} />
       </Route>
 
       {/* Fallback */}

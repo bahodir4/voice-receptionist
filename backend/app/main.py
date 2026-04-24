@@ -8,19 +8,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.core.config import get_settings
-from app.core.logger import get_logger, setup_logging
+from loguru import logger
+from app.core.logger import setup_logging
 from app.database import Database
-from app.routers import auth
+from app.routers import auth, voice
 
 settings = get_settings()
 setup_logging(debug=settings.DEBUG)
-logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await Database.connect()
-    logger.info("Application started — debug=%s", settings.DEBUG)
+    logger.info("Application started — debug={}", settings.DEBUG)
     yield
     await Database.disconnect()
     logger.info("Application stopped")
@@ -44,6 +44,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(auth.router)
+    app.include_router(voice.router)
 
     @app.get("/health", tags=["system"])
     async def health() -> JSONResponse:

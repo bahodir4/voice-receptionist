@@ -11,5 +11,16 @@ fastapi-mail==1.4.2
 email-validator==2.2.0
 python-multipart==0.0.20
 python-dotenv==1.0.1
+loguru==0.7.3
 httpx==0.28.1
 dnspython==2.7.0
+
+# ── Phase 2: Voice pipeline ────────────────────────────────────────────────────
+livekit-agents[openai,elevenlabs,silero]~=1.5
+livekit-api~=1.1
+openai>=1.57.0
+elevenlabs>=2.44.0
+
+# ── Phase 2 extras: multilingual turn detection + noise cancellation ──────────
+livekit-plugins-turn-detector
+livekit-plugins-ai-coustics

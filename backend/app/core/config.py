@@ -33,15 +33,15 @@ class Settings(BaseSettings):
     LIVEKIT_API_KEY: str = ""
     LIVEKIT_API_SECRET: str = ""
 
-    # ── xAI Grok (Phase 2) ────────────────────────────────────────────────
+    # ── Groq LLM (Phase 2) ────────────────────────────────────────────────
     GROK_API_KEY: str = ""
-    GROK_BASE_URL: str = "https://api.x.ai/v1"
-    GROK_MODEL: str = "grok-3"
+    GROK_BASE_URL: str = "https://api.groq.com/openai/v1"
+    GROK_MODEL: str = "llama-3.3-70b-versatile"
 
     # ── ElevenLabs (Phase 2) ──────────────────────────────────────────────
     ELEVENLABS_API_KEY: str = ""
     ELEVENLABS_VOICE_ID: str = "21m00Tcm4TlvDq8ikWAM"
-    ELEVENLABS_MODEL_ID: str = "eleven_flash_v2_5"
+    ELEVENLABS_MODEL_ID: str = "eleven_multilingual_v2"
 
     # ── Twilio (Phase 4) ──────────────────────────────────────────────────
     TWILIO_ACCOUNT_SID: str = ""

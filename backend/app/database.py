@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import logging
+from loguru import logger
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from app.core.config import get_settings
-
-logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -30,7 +28,7 @@ class Database:
         cls._db = cls._client[settings.MONGODB_DB_NAME]
         await cls._client.admin.command("ping")
         await cls._ensure_indexes()
-        logger.info("MongoDB connected — db=%s", settings.MONGODB_DB_NAME)
+        logger.info("MongoDB connected — db={}", settings.MONGODB_DB_NAME)
 
     @classmethod
     async def disconnect(cls) -> None:
