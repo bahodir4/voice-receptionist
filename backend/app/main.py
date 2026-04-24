@@ -11,7 +11,7 @@ from app.core.config import get_settings
 from loguru import logger
 from app.core.logger import setup_logging
 from app.database import Database
-from app.routers import auth, voice, chat
+from app.routers import auth, voice, chat, phone
 
 settings = get_settings()
 setup_logging(debug=settings.DEBUG)
@@ -46,6 +46,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(voice.router)
     app.include_router(chat.router)
+    app.include_router(phone.router)
 
     @app.get("/health", tags=["system"])
     async def health() -> JSONResponse:

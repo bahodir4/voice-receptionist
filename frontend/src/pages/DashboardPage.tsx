@@ -42,9 +42,9 @@ export function DashboardPage() {
       gradient:    'from-teal-600 to-emerald-600',
       borderHover: 'hover:border-teal-500/30',
       glowHover:   'hover:shadow-[0_8px_32px_rgba(20,184,166,0.15)]',
-      badge:    'Phase 4',
-      badgeCls: 'bg-white/[0.04] text-slate-500 border-white/[0.06]',
-      dot:      'bg-slate-600',
+      badge:    'Live',
+      badgeCls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      dot:      'bg-emerald-400',
     },
     {
       to: '/admin',

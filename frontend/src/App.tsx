@@ -8,6 +8,7 @@ import { ResetPasswordPage }  from '@/pages/ResetPasswordPage'
 import { DashboardPage }      from '@/pages/DashboardPage'
 import { VoiceChatPage }      from '@/pages/VoiceChatPage'
 import { TextChatPage }       from '@/pages/TextChatPage'
+import { PhonePage }          from '@/pages/PhonePage'
 import { ProtectedRoute }     from '@/components/shared/ProtectedRoute'
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/voice"     element={<VoiceChatPage />} />
         <Route path="/chat"      element={<TextChatPage />} />
+        <Route path="/phone"     element={<PhonePage />} />
       </Route>
 
       {/* Fallback */}
