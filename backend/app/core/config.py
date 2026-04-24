@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     APP_NAME: str = "Voice Receptionist"
     FRONTEND_URL: str = "http://localhost:5173"
     BACKEND_URL: str = "http://localhost:8000"
+    HOST: str = "0.0.0.0"
+    PORT: int = 8000
     DEBUG: bool = True
 
     # ── LiveKit (Phase 2) ─────────────────────────────────────────────────
@@ -43,10 +45,17 @@ class Settings(BaseSettings):
     ELEVENLABS_VOICE_ID: str = "21m00Tcm4TlvDq8ikWAM"
     ELEVENLABS_MODEL_ID: str = "eleven_multilingual_v2"
 
-    # ── Twilio (Phase 4) ──────────────────────────────────────────────────
+    # ── Twilio / SIP (Phase 4) ────────────────────────────────────────────
     TWILIO_ACCOUNT_SID: str = ""
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_PHONE_NUMBER: str = ""
+
+    # LiveKit SIP — provisioned once via LiveKit console / CLI
+    LIVEKIT_SIP_DOMAIN: str = ""               # e.g. abc123.sip.livekit.cloud
+    LIVEKIT_SIP_INBOUND_TRUNK_ID: str = ""     # created once via lk sip inbound create
+    LIVEKIT_SIP_OUTBOUND_TRUNK_ID: str = ""    # created once via lk sip outbound create
+    TWILIO_SIP_USERNAME: str = ""              # auth username for inbound SIP trunk
+    TWILIO_SIP_PASSWORD: str = ""              # auth password for inbound SIP trunk
 
     model_config = SettingsConfigDict(
         env_file=".env",

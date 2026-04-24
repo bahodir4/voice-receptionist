@@ -44,7 +44,7 @@ except ImportError:
 
 from app.core.config import get_settings
 from app.core.logger import setup_logging
-from app.services.agent_service import get_system_prompt
+from app.services.agent_service import build_system_prompt, load_business_settings
 
 settings = get_settings()
 setup_logging(debug=settings.DEBUG)
@@ -53,14 +53,20 @@ server = AgentServer()
 
 
 class VoiceReceptionist(Agent):
-    """Agent class with an on_enter greeting."""
+    """Agent class with context-aware on_enter greeting."""
 
-    def __init__(self) -> None:
-        super().__init__(instructions=get_system_prompt())
+    def __init__(self, instructions: str, is_phone_call: bool = False) -> None:
+        super().__init__(instructions=instructions)
+        self._is_phone_call = is_phone_call
 
     async def on_enter(self) -> None:
+        greeting_instruction = (
+            "Greet the caller warmly. Keep it to one sentence, then ask how you can help."
+            if self._is_phone_call
+            else "Greet the user warmly and ask how you can help them today."
+        )
         await self.session.generate_reply(
-            instructions="Greet the caller warmly and ask how you can help them today.",
+            instructions=greeting_instruction,
             allow_interruptions=True,
         )
 
@@ -82,7 +88,11 @@ server.setup_fnc = prewarm
 
 @server.rtc_session(agent_name="voice-receptionist")
 async def entrypoint(ctx: JobContext) -> None:
-    logger.info("Agent job started room={}", ctx.room.name)
+    is_phone_call = ctx.room.name.startswith("phone-")
+    logger.info("Agent job started room={} phone_call={}", ctx.room.name, is_phone_call)
+
+    biz_settings = await load_business_settings()
+    system_prompt = build_system_prompt(biz_settings)
 
     # ── STT: ElevenLabs Scribe v2 realtime ───────────────────────────────
     stt = lk_elevenlabs.STT(
@@ -149,7 +159,7 @@ async def entrypoint(ctx: JobContext) -> None:
         room_options = None
 
     await session.start(
-        agent=VoiceReceptionist(),
+        agent=VoiceReceptionist(instructions=system_prompt, is_phone_call=is_phone_call),
         room=ctx.room,
         **({"room_options": room_options} if room_options else {}),
     )

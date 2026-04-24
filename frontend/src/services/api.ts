@@ -104,6 +104,68 @@ class ApiClient {
   async deleteChatSession(sessionId: string) {
     return this.http.delete(`/api/chat/sessions/${sessionId}`)
   }
+
+  // ── Phone ─────────────────────────────────────────────────────────────────
+
+  async initiateOutboundCall(toNumber: string) {
+    const res = await this.http.post<{
+      call_id: string
+      room_name: string
+      status: string
+      created_at: string
+    }>('/api/phone/calls/outbound', { to_number: toNumber })
+    return res.data
+  }
+
+  async listPhoneCalls(skip = 0, limit = 50) {
+    const res = await this.http.get<{
+      calls: import('@/store/phoneStore').PhoneCall[]
+      total: number
+    }>('/api/phone/calls', { params: { skip, limit } })
+    return res.data
+  }
+
+  async getPhoneCall(callId: string) {
+    const res = await this.http.get<import('@/store/phoneStore').PhoneCall>(
+      `/api/phone/calls/${callId}`,
+    )
+    return res.data
+  }
+
+  // ── Analytics ─────────────────────────────────────────────────────────────
+
+  async getAnalyticsOverview() {
+    const res = await this.http.get<import('@/store/adminStore').OverviewData>('/api/analytics/overview')
+    return res.data
+  }
+
+  async getAnalyticsCalls(skip = 0, limit = 50) {
+    const res = await this.http.get<{
+      items: import('@/store/adminStore').CallLogItem[]
+      total: number
+    }>('/api/analytics/calls', { params: { skip, limit } })
+    return res.data
+  }
+
+  async getAnalyticsChats(skip = 0, limit = 50) {
+    const res = await this.http.get<{
+      items: import('@/store/adminStore').ChatSessionItem[]
+      total: number
+    }>('/api/analytics/chats', { params: { skip, limit } })
+    return res.data
+  }
+
+  // ── Settings ──────────────────────────────────────────────────────────────
+
+  async getBusinessSettings() {
+    const res = await this.http.get<import('@/store/adminStore').BusinessSettings>('/api/settings/business')
+    return res.data
+  }
+
+  async updateBusinessSettings(body: import('@/store/adminStore').BusinessSettings) {
+    const res = await this.http.put<import('@/store/adminStore').BusinessSettings>('/api/settings/business', body)
+    return res.data
+  }
 }
 
 export interface User {
