@@ -88,6 +88,20 @@
       "analytics_desc": "Qo'ng'iroq jurnallari, transkripsiyalar, bronlar va tez-tez so'raladigan savollar"
     }
   },
+  "chat": {
+    "title": "Matnli Chat",
+    "back": "Boshqaruv paneli",
+    "placeholder": "Xabar yozing…",
+    "send": "Yuborish",
+    "new_chat": "Yangi suhbat",
+    "thinking": "Sun'iy intellekt o'ylayapti…",
+    "empty_title": "Suhbatni boshlang",
+    "empty_desc": "Istalgan narsani so'rang — sun'iy intellekt qabulxonangiz yordam berishga tayyor",
+    "hint": "Yuborish uchun Enter · Yangi qator uchun Shift+Enter",
+    "suggest_1": "Menga qanday yordam bera olasiz?",
+    "suggest_2": "Uchrashuv belgilashni xohlayman",
+    "suggest_3": "Ish vaqtlaringiz qanday?"
+  },
   "voice": {
     "title": "Ovozli Chat",
     "back": "Boshqaruv paneli",
