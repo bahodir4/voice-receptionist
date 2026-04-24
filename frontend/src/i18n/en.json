@@ -88,6 +88,20 @@
       "analytics_desc": "Call logs, transcripts, bookings & FAQs"
     }
   },
+  "chat": {
+    "title": "Text Chat",
+    "back": "Dashboard",
+    "placeholder": "Type a message…",
+    "send": "Send",
+    "new_chat": "New Chat",
+    "thinking": "AI is thinking…",
+    "empty_title": "Start a conversation",
+    "empty_desc": "Ask anything — your AI receptionist is ready to help",
+    "hint": "Enter to send · Shift+Enter for new line",
+    "suggest_1": "What can you help me with?",
+    "suggest_2": "I'd like to book an appointment",
+    "suggest_3": "What are your business hours?"
+  },
   "voice": {
     "title": "Voice Chat",
     "back": "Dashboard",

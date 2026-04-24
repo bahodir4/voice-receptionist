@@ -84,6 +84,26 @@ class ApiClient {
       { room_name: roomName },
     )
   }
+
+  // ── Text Chat ─────────────────────────────────────────────────────────────
+
+  async createChatSession() {
+    return this.http.post<{ session_id: string; created_at: string }>('/api/chat/sessions')
+  }
+
+  async getChatSession(sessionId: string) {
+    return this.http.get<{
+      session_id: string
+      title: string
+      created_at: string
+      updated_at: string
+      messages: Array<{ id: string; role: 'user' | 'assistant'; content: string; timestamp: string }>
+    }>(`/api/chat/sessions/${sessionId}`)
+  }
+
+  async deleteChatSession(sessionId: string) {
+    return this.http.delete(`/api/chat/sessions/${sessionId}`)
+  }
 }
 
 export interface User {

@@ -57,6 +57,11 @@ class Database:
         await db.email_tokens.create_index("user_id")
         await db.email_tokens.create_index("expires_at", expireAfterSeconds=0)
 
+        # chat_sessions
+        await db.chat_sessions.create_index("user_id")
+        await db.chat_sessions.create_index([("user_id", 1), ("created_at", -1)])
+        await db.chat_sessions.create_index("status")
+
         logger.info("MongoDB indexes ensured")
 
     # ── Accessor ───────────────────────────────────────────────────────────
