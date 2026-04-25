@@ -21,7 +21,7 @@ const schema = z.object({
 })
 type FormData = z.infer<typeof schema>
 
-const container = {
+const stagger = {
   hidden: {},
   show: { transition: { staggerChildren: 0.07 } },
 }
@@ -54,12 +54,11 @@ export function LoginPage() {
 
   return (
     <AuthLayout>
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+      <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
 
-        {/* Header */}
-        <motion.div variants={item} className="space-y-1.5">
-          <h2 className="text-2xl font-bold text-white tracking-tight">Welcome back</h2>
-          <p className="text-slate-500 text-sm">Sign in to your account to continue</p>
+        <motion.div variants={item} className="space-y-2">
+          <h2 className="text-2xl font-bold text-white tracking-tight">{t('auth.login.title')}</h2>
+          <p className="text-slate-500 text-sm">{t('auth.login.subtitle')}</p>
         </motion.div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -97,7 +96,8 @@ export function LoginPage() {
             <label className="flex items-center gap-2 cursor-pointer group">
               <div className="relative">
                 <input type="checkbox" className="sr-only peer" {...register('remember_me')} />
-                <div className="w-4 h-4 rounded border border-white/15 bg-white/[0.04] peer-checked:bg-violet-600 peer-checked:border-violet-600 transition-all" />
+                <div className="w-4 h-4 rounded border border-white/15 bg-white/[0.04]
+                                peer-checked:bg-violet-600 peer-checked:border-violet-600 transition-all" />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 peer-checked:opacity-100 transition-opacity">
                   <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 10">
                     <path d="M1.5 5l2.5 2.5L8.5 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -108,7 +108,8 @@ export function LoginPage() {
                 {t('auth.login.remember')}
               </span>
             </label>
-            <Link to="/forgot-password" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+            <Link to="/forgot-password"
+              className="text-xs text-violet-400 hover:text-violet-300 transition-colors font-medium">
               {t('auth.login.forgot')}
             </Link>
           </motion.div>
@@ -121,20 +122,18 @@ export function LoginPage() {
         </form>
 
         <motion.div variants={item}>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.06]" />
-            </div>
-            <div className="relative text-center">
-              <span className="bg-[#06060f] px-3 text-xs text-slate-600">or</span>
-            </div>
+          <div className="relative flex items-center gap-3">
+            <div className="flex-1 h-px bg-white/[0.06]" />
+            <span className="text-xs text-slate-600 font-medium">{t('common.or')}</span>
+            <div className="flex-1 h-px bg-white/[0.06]" />
           </div>
         </motion.div>
 
         <motion.div variants={item} className="text-center">
           <p className="text-sm text-slate-600">
             {t('auth.login.no_account')}{' '}
-            <Link to="/register" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
+            <Link to="/register"
+              className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
               {t('auth.login.register_link')}
             </Link>
           </p>

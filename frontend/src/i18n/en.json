@@ -76,7 +76,10 @@
     "total_sessions": "Total Sessions",
     "no_data": "No data yet",
     "all_time": "All time",
+    "today_label": "Today",
+    "calls_and_voice": "Calls & voice sessions",
     "open": "Open",
+    "coming_soon": "Coming Soon",
     "cards": {
       "voice_title": "Voice Chat",
       "voice_desc": "Talk to your AI receptionist via browser mic",
@@ -195,6 +198,11 @@
     "mic": "Mic",
     "start_call": "Start Voice Call",
     "end_call": "End Call",
-    "connecting": "Connecting…"
+    "connecting": "Connecting…",
+    "session_ended": "Conversation Ended",
+    "session_ended_desc": "Your session has been saved. Start a new conversation anytime.",
+    "duration": "Duration",
+    "messages": "Messages",
+    "new_conversation": "New Conversation"
   }
 }

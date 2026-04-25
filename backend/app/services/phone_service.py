@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 
-from livekit.api import LiveKitAPI, CreateSIPParticipantRequest
+from livekit.api import LiveKitAPI, CreateSIPParticipantRequest, CreateAgentDispatchRequest, CreateRoomRequest
 from loguru import logger
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
@@ -106,10 +106,17 @@ class PhoneService:
             api_key=s.LIVEKIT_API_KEY,
             api_secret=s.LIVEKIT_API_SECRET,
         ) as lkapi:
+            await lkapi.room.create_room(CreateRoomRequest(name=room_name))
+            await lkapi.agent_dispatch.create_dispatch(
+                CreateAgentDispatchRequest(
+                    agent_name="voice-receptionist",
+                    room=room_name,
+                )
+            )
             await lkapi.sip.create_sip_participant(
                 CreateSIPParticipantRequest(
                     sip_trunk_id=s.LIVEKIT_SIP_OUTBOUND_TRUNK_ID,
-                    sip_url=f"sip:{to_number}@sip.twilio.com",
+                    sip_call_to=to_number,
                     sip_number=s.TWILIO_PHONE_NUMBER,
                     room_name=room_name,
                     participant_identity=f"phone-{to_number}",
