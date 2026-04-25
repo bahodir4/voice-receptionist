@@ -80,6 +80,15 @@ class VoiceReceptionist(Agent):
         async def _disconnect() -> None:
             await asyncio.sleep(3.5)  # allow farewell TTS to finish
             try:
+                # Signal the browser to end the session before the agent leaves
+                await self._ctx.room.local_participant.publish_data(
+                    b"CONVERSATION_ENDED",
+                    reliable=True,
+                )
+                await asyncio.sleep(0.3)  # give the data message time to arrive
+            except Exception as exc:
+                logger.warning("Could not publish end signal: {}", exc)
+            try:
                 await self._ctx.room.disconnect()
                 logger.info("Room disconnected after farewell room={}", self._ctx.room.name)
             except Exception as exc:

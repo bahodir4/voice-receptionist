@@ -8,9 +8,10 @@ import {
   useVoiceAssistant,
   useLocalParticipant,
   useTrackTranscription,
+  useRoomContext,
   RoomAudioRenderer,
 } from '@livekit/components-react'
-import { Track } from 'livekit-client'
+import { Track, RoomEvent } from 'livekit-client'
 import '@livekit/components-styles'
 
 import { OrbAnimation } from '@/components/VoiceChat/OrbAnimation'
@@ -102,10 +103,21 @@ function OrbStage() {
   )
 }
 
-function VoiceRoomContent() {
+function VoiceRoomContent({ onConversationEnd }: { onConversationEnd: () => void }) {
   const setAgentState = useVoiceStore(s => s.setAgentState)
   const setConnected  = useVoiceStore(s => s.setConnected)
   const { startMicAnalyser } = useLiveKit()
+  const room = useRoomContext()
+
+  useEffect(() => {
+    const handleData = (payload: Uint8Array) => {
+      if (new TextDecoder().decode(payload) === 'CONVERSATION_ENDED') {
+        onConversationEnd()
+      }
+    }
+    room.on(RoomEvent.DataReceived, handleData)
+    return () => { room.off(RoomEvent.DataReceived, handleData) }
+  }, [room, onConversationEnd])
 
   const { state: lkState, agentTranscriptions } = useVoiceAssistant()
   const { localParticipant } = useLocalParticipant()
@@ -257,7 +269,7 @@ export function VoiceChatPage() {
           onError={(e) => console.error('LiveKit error', e)}
           style={{ display: 'none' }}
         >
-          <VoiceRoomContent />
+          <VoiceRoomContent onConversationEnd={handleDisconnect} />
         </LiveKitRoom>
       )}
 
