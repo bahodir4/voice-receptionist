@@ -9,7 +9,10 @@ class ApiClient {
     this.http = axios.create({
       baseURL: BASE_URL,
       timeout: 15_000,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+      },
     })
 
     this.http.interceptors.request.use((config) => {

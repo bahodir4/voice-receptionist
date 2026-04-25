@@ -17,8 +17,10 @@ interface VoiceState {
   token: string | null
   livekitUrl: string | null
   isConnected: boolean
-  audioLevel: number   // 0–1, driven by local mic
-  agentLevel: number  // 0–1, driven by agent audio
+  sessionEnded: boolean
+  sessionDuration: number   // seconds
+  audioLevel: number
+  agentLevel: number
 
   setAgentState: (state: AgentState) => void
   setRoomInfo: (token: string, roomName: string, livekitUrl: string) => void
@@ -27,6 +29,7 @@ interface VoiceState {
   setAudioLevel: (level: number) => void
   setAgentLevel: (level: number) => void
   setConnected: (v: boolean) => void
+  endSession: (durationSecs: number) => void
   reset: () => void
 }
 
@@ -37,6 +40,8 @@ export const useVoiceStore = create<VoiceState>((set) => ({
   token: null,
   livekitUrl: null,
   isConnected: false,
+  sessionEnded: false,
+  sessionDuration: 0,
   audioLevel: 0,
   agentLevel: 0,
 
@@ -56,6 +61,18 @@ export const useVoiceStore = create<VoiceState>((set) => ({
       ),
     })),
 
+  endSession: (durationSecs) =>
+    set(() => ({
+      sessionEnded: true,
+      sessionDuration: durationSecs,
+      isConnected: false,
+      token: null,
+      livekitUrl: null,
+      agentState: 'disconnected',
+      audioLevel: 0,
+      agentLevel: 0,
+    })),
+
   reset: () =>
     set({
       agentState: 'idle',
@@ -64,6 +81,8 @@ export const useVoiceStore = create<VoiceState>((set) => ({
       token: null,
       livekitUrl: null,
       isConnected: false,
+      sessionEnded: false,
+      sessionDuration: 0,
       audioLevel: 0,
       agentLevel: 0,
     }),

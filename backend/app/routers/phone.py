@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import traceback
+
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from loguru import logger
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.database import get_database
@@ -68,6 +71,7 @@ async def initiate_outbound_call(
         result = await svc.initiate_outbound(current_user["id"], body.to_number)
         return OutboundCallResponse(**result)
     except Exception as exc:
+        logger.error("Outbound call failed: {}\n{}", exc, traceback.format_exc())
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc))
 
 

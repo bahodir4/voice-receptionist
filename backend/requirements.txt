@@ -14,6 +14,7 @@ python-dotenv==1.0.1
 loguru==0.7.3
 httpx==0.28.1
 dnspython==2.7.0
+torch>=2.0.0
 livekit-agents[openai,elevenlabs,silero]~=1.5
 livekit-api~=1.1
 openai>=1.57.0

@@ -8,6 +8,8 @@ Run alongside the FastAPI server (separate terminal):
 """
 from __future__ import annotations
 
+import asyncio
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -20,13 +22,13 @@ from livekit.agents import (
     JobProcess,
     TurnHandlingOptions,
     cli,
+    function_tool,
     room_io,
 )
 from livekit.plugins import openai as lk_openai
 from livekit.plugins import elevenlabs as lk_elevenlabs
 from livekit.plugins import silero
 
-# Optional noise cancellation — gracefully disabled if package is not installed
 try:
     from livekit.plugins import ai_coustics
     _AI_COUSTICS_AVAILABLE = True
@@ -34,7 +36,6 @@ except ImportError:
     _AI_COUSTICS_AVAILABLE = False
     logger.warning("livekit-plugins-ai-coustics not installed — noise cancellation disabled")
 
-# Optional multilingual turn detection
 try:
     from livekit.plugins.turn_detector.multilingual import MultilingualModel
     _TURN_DETECTOR_AVAILABLE = True
@@ -53,10 +54,11 @@ server = AgentServer()
 
 
 class VoiceReceptionist(Agent):
-    """Agent class with context-aware on_enter greeting."""
+    """Voice receptionist agent with farewell auto-hangup support."""
 
-    def __init__(self, instructions: str, is_phone_call: bool = False) -> None:
+    def __init__(self, instructions: str, ctx: JobContext, is_phone_call: bool = False) -> None:
         super().__init__(instructions=instructions)
+        self._ctx = ctx
         self._is_phone_call = is_phone_call
 
     async def on_enter(self) -> None:
@@ -70,16 +72,29 @@ class VoiceReceptionist(Agent):
             allow_interruptions=True,
         )
 
+    @function_tool
+    async def end_conversation(self) -> str:
+        """Call this tool when the user says goodbye, thank you and goodbye, or explicitly wants
+        to end the call/conversation. After you receive this result, say a brief warm farewell
+        — the call will disconnect automatically."""
+        async def _disconnect() -> None:
+            await asyncio.sleep(3.5)  # allow farewell TTS to finish
+            try:
+                await self._ctx.room.disconnect()
+                logger.info("Room disconnected after farewell room={}", self._ctx.room.name)
+            except Exception as exc:
+                logger.warning("Disconnect failed: {}", exc)
+
+        asyncio.create_task(_disconnect())
+        return "Farewell acknowledged. Please say a brief, warm goodbye to the caller (one sentence only)."
+
 
 def prewarm(proc: JobProcess) -> None:
     proc.userdata["vad"] = silero.VAD.load(
-        # Raise threshold so casual background noise / distant voices don't trigger
-        activation_threshold=0.65,
-        # Require at least 150ms of continuous speech before accepting it
-        # (default 50ms — too easy for a cough or noise burst to pass)
-        min_speech_duration=0.15,
-        # Keep a comfortable silence gap before we cut the user's turn
-        min_silence_duration=0.6,
+        activation_threshold=0.75,
+        deactivation_threshold=0.55,
+        min_speech_duration=0.2,
+        min_silence_duration=0.9,
     )
 
 
@@ -94,13 +109,11 @@ async def entrypoint(ctx: JobContext) -> None:
     biz_settings = await load_business_settings()
     system_prompt = build_system_prompt(biz_settings)
 
-    # ── STT: ElevenLabs Scribe v2 realtime ───────────────────────────────
     stt = lk_elevenlabs.STT(
         model_id="scribe_v2",
         api_key=settings.ELEVENLABS_API_KEY,
     )
 
-    # ── LLM: Groq via OpenAI-compatible SDK ──────────────────────────────
     llm = lk_openai.LLM(
         model=settings.GROK_MODEL,
         base_url=settings.GROK_BASE_URL,
@@ -108,18 +121,15 @@ async def entrypoint(ctx: JobContext) -> None:
         temperature=0.7,
     )
 
-    # ── TTS: ElevenLabs multilingual v2 ──────────────────────────────────
     tts = lk_elevenlabs.TTS(
         voice_id=settings.ELEVENLABS_VOICE_ID,
         model=settings.ELEVENLABS_MODEL_ID,
         api_key=settings.ELEVENLABS_API_KEY,
     )
 
-    # ── Turn detection: multilingual model if available ───────────────────
     if _TURN_DETECTOR_AVAILABLE:
         turn_handling = TurnHandlingOptions(
             turn_detection=MultilingualModel(),
-            # Still enforce a minimum delay so single noise pops can't fire the LLM
             endpointing={"min_delay": 0.8, "max_delay": 4.0},
         )
     else:
@@ -135,7 +145,6 @@ async def entrypoint(ctx: JobContext) -> None:
         turn_handling=turn_handling,
     )
 
-    # ── Transcript logging ────────────────────────────────────────────────
     @session.on("user_input_transcribed")
     def _on_user(event) -> None:
         if event.is_final:
@@ -146,12 +155,12 @@ async def entrypoint(ctx: JobContext) -> None:
         if getattr(event.item, "role", None) == "assistant":
             logger.info("[AGENT] {}", getattr(event.item, "text_content", "")[:120])
 
-    # ── Room options: noise cancellation (ai_coustics) if available ───────
     if _AI_COUSTICS_AVAILABLE:
         room_options = room_io.RoomOptions(
             audio_input=room_io.AudioInputOptions(
                 noise_cancellation=ai_coustics.audio_enhancement(
                     model=ai_coustics.EnhancerModel.QUAIL_VF_L,
+                    model_parameters=ai_coustics.ModelParameters(enhancement_level=0.9),
                 ),
             ),
         )
@@ -159,7 +168,7 @@ async def entrypoint(ctx: JobContext) -> None:
         room_options = None
 
     await session.start(
-        agent=VoiceReceptionist(instructions=system_prompt, is_phone_call=is_phone_call),
+        agent=VoiceReceptionist(instructions=system_prompt, ctx=ctx, is_phone_call=is_phone_call),
         room=ctx.room,
         **({"room_options": room_options} if room_options else {}),
     )

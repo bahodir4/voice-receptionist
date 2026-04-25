@@ -16,20 +16,34 @@ class AnalyticsService:
 
     async def get_overview(self) -> dict:
         now = datetime.now(timezone.utc)
-        today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        today           = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        yesterday_start = today - timedelta(days=1)
 
-        phone_today   = await self._db.phone_calls.count_documents({"created_at": {"$gte": today}})
-        phone_all     = await self._db.phone_calls.count_documents({})
-        voice_today   = await self._db.voice_sessions.count_documents({"started_at": {"$gte": today}})
-        voice_all     = await self._db.voice_sessions.count_documents({})
-        chat_today    = await self._db.chat_sessions.count_documents({"created_at": {"$gte": today}})
-        chat_all      = await self._db.chat_sessions.count_documents({})
+        phone_today     = await self._db.phone_calls.count_documents({"created_at": {"$gte": today}})
+        phone_yest      = await self._db.phone_calls.count_documents({"created_at": {"$gte": yesterday_start, "$lt": today}})
+        phone_all       = await self._db.phone_calls.count_documents({})
+        voice_today     = await self._db.voice_sessions.count_documents({"started_at": {"$gte": today}})
+        voice_yest      = await self._db.voice_sessions.count_documents({"started_at": {"$gte": yesterday_start, "$lt": today}})
+        voice_all       = await self._db.voice_sessions.count_documents({})
+        chat_today      = await self._db.chat_sessions.count_documents({"created_at": {"$gte": today}})
+        chat_yest       = await self._db.chat_sessions.count_documents({"created_at": {"$gte": yesterday_start, "$lt": today}})
+        chat_all        = await self._db.chat_sessions.count_documents({})
 
-        avg_result = await self._db.phone_calls.aggregate([
+        # weighted average across phone calls and voice sessions
+        phone_avg_r = await self._db.phone_calls.aggregate([
             {"$match": {"status": "completed", "duration_seconds": {"$gt": 0}}},
-            {"$group": {"_id": None, "avg": {"$avg": "$duration_seconds"}}},
+            {"$group": {"_id": None, "avg": {"$avg": "$duration_seconds"}, "count": {"$sum": 1}}},
         ]).to_list(1)
-        avg_duration = int(avg_result[0]["avg"]) if avg_result else 0
+        voice_avg_r = await self._db.voice_sessions.aggregate([
+            {"$match": {"status": "ended", "ended_at": {"$ne": None}}},
+            {"$project": {"dur_s": {"$divide": [{"$subtract": ["$ended_at", "$started_at"]}, 1000]}}},
+            {"$match": {"dur_s": {"$gt": 0}}},
+            {"$group": {"_id": None, "avg": {"$avg": "$dur_s"}, "count": {"$sum": 1}}},
+        ]).to_list(1)
+        p = phone_avg_r[0] if phone_avg_r else {"avg": 0, "count": 0}
+        v = voice_avg_r[0] if voice_avg_r else {"avg": 0, "count": 0}
+        total_count = p["count"] + v["count"]
+        avg_duration = int((p["avg"] * p["count"] + v["avg"] * v["count"]) / total_count) if total_count > 0 else 0
 
         chart = await self._chart_data(7)
 
@@ -39,6 +53,12 @@ class AnalyticsService:
                 "voice_sessions": voice_today,
                 "chat_sessions": chat_today,
                 "total": phone_today + voice_today + chat_today,
+            },
+            "yesterday": {
+                "phone_calls": phone_yest,
+                "voice_sessions": voice_yest,
+                "chat_sessions": chat_yest,
+                "total": phone_yest + voice_yest + chat_yest,
             },
             "all_time": {
                 "phone_calls": phone_all,

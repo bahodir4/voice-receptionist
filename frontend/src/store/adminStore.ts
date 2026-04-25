@@ -9,6 +9,7 @@ export interface ChartPoint {
 
 export interface OverviewData {
   today: { phone_calls: number; voice_sessions: number; chat_sessions: number; total: number }
+  yesterday: { phone_calls: number; voice_sessions: number; chat_sessions: number; total: number }
   all_time: { phone_calls: number; voice_sessions: number; chat_sessions: number; total: number }
   avg_call_duration: number
   chart: ChartPoint[]

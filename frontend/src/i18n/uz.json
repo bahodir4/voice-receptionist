@@ -76,7 +76,10 @@
     "total_sessions": "Jami sessiyalar",
     "no_data": "Ma'lumot yo'q",
     "all_time": "Barcha vaqt",
+    "today_label": "Bugun",
+    "calls_and_voice": "Qo'ng'iroqlar va ovozli sessiyalar",
     "open": "Ochish",
+    "coming_soon": "Tez Kunda",
     "cards": {
       "voice_title": "Ovozli Chat",
       "voice_desc": "Brauzer mikrofoni orqali sun'iy intellekt qabulxonasi bilan gapiring",
@@ -195,6 +198,11 @@
     "mic": "Mikrofon",
     "start_call": "Ovozli qo'ng'iroqni boshlash",
     "end_call": "Qo'ng'iroqni tugatish",
-    "connecting": "Ulanmoqda…"
+    "connecting": "Ulanmoqda…",
+    "session_ended": "Suhbat Tugadi",
+    "session_ended_desc": "Sessiyangiz saqlandi. Istalgan vaqt yangi suhbat boshlang.",
+    "duration": "Davomiylik",
+    "messages": "Xabarlar",
+    "new_conversation": "Yangi Suhbat"
   }
 }

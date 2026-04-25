@@ -2,6 +2,24 @@
 
 An AI-powered voice receptionist that handles inbound/outbound phone calls, browser voice sessions, and text chat — with a full admin analytics panel.
 
+> **MongoDB** is hosted externally (MongoDB Atlas or any other provider). There is no local Mongo container — just plug in your connection string.
+
+---
+
+## Screenshots
+
+| Login | Dashboard |
+|-------|-----------|
+| ![Login](docs/imgs/login.png) | ![Dashboard](docs/imgs/dashboard.png) |
+
+| Voice Chat | Text Chat |
+|------------|-----------|
+| ![Voice Chat](docs/imgs/voice-chat.png) | ![Text Chat](docs/imgs/text-chat.png) |
+
+| Analytics Overview | Business Settings |
+|--------------------|-------------------|
+| ![Admin Overview](docs/imgs/admin-overview.png) | ![Admin Settings](docs/imgs/admin-settings.png) |
+
 ---
 
 ## Architecture
@@ -12,20 +30,30 @@ An AI-powered voice receptionist that handles inbound/outbound phone calls, brow
 
 ## Credential Setup
 
-### 1. LiveKit
+### 1. MongoDB Atlas
+1. Create a free cluster at [cloud.mongodb.com](https://cloud.mongodb.com)
+2. Create a database user with read/write access
+3. Whitelist your IP (or `0.0.0.0/0` for development)
+4. **Connect → Drivers** → copy the connection string
+5. Paste into `backend/.env` as `MONGODB_URI`:
+   ```
+   MONGODB_URI=mongodb+srv://user:password@cluster.mongodb.net/voice_receptionist?retryWrites=true&w=majority
+   ```
+
+### 2. LiveKit
 1. Create a project at [cloud.livekit.io](https://cloud.livekit.io)
 2. Copy **URL**, **API Key**, **API Secret** → `backend/.env`
 
-### 2. Groq
+### 3. Groq
 1. Sign up at [console.groq.com](https://console.groq.com)
 2. Create an API key → `GROK_API_KEY` in `backend/.env`
 
-### 3. ElevenLabs
+### 4. ElevenLabs
 1. Sign up at [elevenlabs.io](https://elevenlabs.io)
 2. Go to **Profile → API Keys** → copy key → `ELEVENLABS_API_KEY`
 3. Optionally choose a voice ID → `ELEVENLABS_VOICE_ID`
 
-### 4. Twilio (Phone calls)
+### 5. Twilio (Phone calls)
 1. Sign up at [console.twilio.com](https://console.twilio.com)
 2. Buy a phone number → `TWILIO_PHONE_NUMBER`
 3. Copy **Account SID** and **Auth Token** → `backend/.env`
@@ -33,7 +61,7 @@ An AI-powered voice receptionist that handles inbound/outbound phone calls, brow
    - **Voice** → `https://your-backend.com/api/phone/webhook/twilio`
    - **Status callback** → `https://your-backend.com/api/phone/webhook/twilio/status`
 
-### 5. LiveKit SIP (one-time, required for phone calls)
+### 6. LiveKit SIP (one-time, required for phone calls)
 ```bash
 # Install LiveKit CLI: https://docs.livekit.io/home/cli/cli-setup/
 
@@ -63,7 +91,7 @@ lk sip outbound create \
 # TWILIO_SIP_USERNAME / PASSWORD  ← same credentials used above
 ```
 
-### 6. Gmail (email verification)
+### 7. Gmail (email verification)
 1. Enable 2FA → **myaccount.google.com/apppasswords** → create App Password
 2. Set `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` in `backend/.env`
 
@@ -72,7 +100,8 @@ lk sip outbound create \
 ## Local Development
 
 ### Prerequisites
-- Python 3.11+, Node.js 20+, MongoDB 7
+- Python 3.11+, Node.js 20+
+- A MongoDB Atlas cluster (free tier works fine)
 
 ### Backend
 ```bash
@@ -110,12 +139,12 @@ cp frontend/.env.example frontend/.env
 ```
 
 ### 2. Fill values
-Edit all three files. At minimum set:
+Edit both files. At minimum set:
 
 | File | Key variables |
 |------|--------------|
-| `.env` | `MONGO_ROOT_PASSWORD`, `VITE_API_URL`, `VITE_LIVEKIT_URL` |
-| `backend/.env` | `JWT_SECRET`, `LIVEKIT_*`, `GROK_API_KEY`, `ELEVENLABS_API_KEY`, `TWILIO_*`, `MAIL_*` |
+| `.env` | `VITE_API_URL`, `VITE_LIVEKIT_URL` |
+| `backend/.env` | `MONGODB_URI`, `JWT_SECRET`, `LIVEKIT_*`, `GROK_API_KEY`, `ELEVENLABS_API_KEY`, `TWILIO_*`, `MAIL_*` |
 | `frontend/.env` | `VITE_API_URL`, `VITE_LIVEKIT_URL` |
 
 ### 3. Build and start
@@ -124,15 +153,12 @@ docker compose up --build          # foreground
 docker compose up --build -d       # background
 docker compose logs -f             # stream logs
 docker compose down                # stop
-docker compose down -v             # stop + wipe data
 ```
 
 ### Port configuration
-Change any port by editing root `.env`:
 ```env
 BACKEND_PORT=9000          # API exposed on host port 9000
 FRONTEND_PORT=8080         # Frontend exposed on host port 8080
-MONGO_EXPOSED_PORT=27018   # MongoDB exposed on host port 27018
 ```
 
 ### Services
@@ -140,7 +166,6 @@ MONGO_EXPOSED_PORT=27018   # MongoDB exposed on host port 27018
 |---------|-------------------|
 | Frontend (nginx) | `FRONTEND_PORT` → **3000** |
 | Backend API | `BACKEND_PORT` → **8000** |
-| MongoDB | `MONGO_EXPOSED_PORT` → **27017** |
 | Agent Worker | no port (connects outbound to LiveKit) |
 
 ---
@@ -157,15 +182,23 @@ MONGO_EXPOSED_PORT=27018   # MongoDB exposed on host port 27018
 
 ---
 
+## Auto End-of-Call Detection
+
+The agent automatically detects when a conversation is over and hangs up without any manual intervention:
+
+- When the caller says **"goodbye"**, **"thank you, goodbye"**, **"have a nice day"**, or any clear farewell phrase, the agent calls the internal `end_conversation` tool
+- The agent delivers a brief farewell reply, then disconnects the room **3.5 seconds** later (giving TTS time to finish)
+- This works for both browser voice sessions and phone calls (SIP)
+
+No extra configuration needed — it is built into the agent's system prompt and function toolset.
+
+---
+
 ## Environment Reference
 
 ### Root `.env`
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `MONGO_ROOT_USER` | `admin` | MongoDB admin username |
-| `MONGO_ROOT_PASSWORD` | — | **Required** — MongoDB password |
-| `MONGO_EXPOSED_PORT` | `27017` | MongoDB host port |
-| `MONGODB_DB_NAME` | `voice_receptionist` | Database name |
 | `BACKEND_PORT` | `8000` | API host port |
 | `FRONTEND_PORT` | `3000` | Frontend host port |
 | `VITE_API_URL` | `http://localhost:8000` | Backend URL (seen by browser) |
@@ -175,7 +208,8 @@ MONGO_EXPOSED_PORT=27018   # MongoDB exposed on host port 27018
 | Variable | Description |
 |----------|-------------|
 | `HOST` / `PORT` | Bind address and port |
-| `MONGODB_URI` | MongoDB URI (overridden in Docker) |
+| `MONGODB_URI` | MongoDB Atlas connection string (`mongodb+srv://...`) |
+| `MONGODB_DB_NAME` | Database name (default: `voice_receptionist`) |
 | `JWT_SECRET` | Random 32+ char secret for tokens |
 | `LIVEKIT_URL/API_KEY/API_SECRET` | LiveKit project credentials |
 | `GROK_API_KEY/MODEL` | Groq LLM credentials |
